@@ -1,16 +1,19 @@
-# win10-mouse-natural-scroll
+# win11-mouse-natural-scroll
+
 Intended to enable a natural scrolling feature for USB mouse under Windows 10
 
-## Get Started
+## Usage
 
-```
-.\mouse-natural-scroll.ps1
-```
+Enable natural scrolling behavior
 
-## To Disable
-
-```
-.\mouse-natural-scroll.ps1 reverse
+```sh
+.\natural-scrolling.ps1 enable
 ```
 
-and restart your computer
+Revert back to default scrolling behavior
+
+```sh
+.\natural-scrolling.ps1 disable
+```
+
+and restart your computer.
