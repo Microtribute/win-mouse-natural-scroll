@@ -1,6 +1,6 @@
 # Natural Scrolling
 
-This repository contains a PowerShell script that enables the natural scrolling behavior (reverse scrolling) for your connected USB mice under Windows 7, 8, 10, 11, and more.
+This repository contains a PowerShell script that enables the natural scrolling behavior (reverse scrolling) for your connected USB/Bluetooth mice under Windows 7, 8, 10, 11, and more.
 
 ## Usage
 
