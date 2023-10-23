@@ -137,7 +137,7 @@ foreach ($Mouse in $Mice) {
 }
 
 if ($SettingUpdated) {
-    Write-Message -ForegroundColor Red -BackgroundColor White -Object "Done. You must reboot your computer for the changes to take effect."
+    Write-Message -ForegroundColor Red -BackgroundColor White -Object "Done. You must reboot your computer or re-plug the devices for the changes to take effect."
 }
 else {
     Write-Message -ForegroundColor White -BackgroundColor DarkGray -Object "Done. No changes have been made."

@@ -24,4 +24,4 @@ Revert back to default scrolling
 .\natural-scrolling.ps1 disable
 ```
 
-You must restart your computer for the change to take effect.
+You must restart your computer or re-plug the devices for the change to take effect.
