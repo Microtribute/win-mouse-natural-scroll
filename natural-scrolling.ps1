@@ -10,7 +10,7 @@
 
 
 # Function to modify registry values
-function UpdateRegistryParameter {
+function Set-ScrollingBehavior {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
@@ -38,34 +38,74 @@ function UpdateRegistryParameter {
     return $ValueUpdated
 }
 
+# Finds devices that are recognized as a mouse
+function Find-Mouse {    
+    # $Mice = (Get-PnpDevice -Class Mouse).where{($_.Status -eq "OK") -and ($_.InstanceID -like "HID\VID*")}
+    # The InstanceID of a bluetooth mouse starts with "HID\{_uuid_}" e.g.
+    # HID\{00001812-0000-1000-8000-00805F9B34FB}_DEV_VID&021235_PID&AA22_REV&0001_231CC511CE68\9&2358A2F3&0&0000
+    return (Get-PnpDevice -Class Mouse).where{ ($_.Status -eq "OK") -and (($_.InstanceID -like "HID\VID*") -or ($_.InstanceID -like "HID\*")) }
+}
+
+# The `Write-Host` command does a bad job at coloring.
+function Write-Message {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $false)]
+        [System.ConsoleColor]$BackgroundColor,
+
+        [Parameter(Mandatory = $false)]
+        [System.ConsoleColor]$ForegroundColor,
+
+
+        [Parameter(Mandatory = $false)]
+        [bool]$NewLine = $true,
+
+        [Parameter(Mandatory = $true)]
+        [Object]$Object
+    )
+
+    $Arguments = @{
+        Separator       = " "
+        NoNewLine       = $true
+        Object          = $Object
+        ForegroundColor = ($ForegroundColor ?? ([System.Console]::ForegroundColor))
+        BackgroundColor = ($BackgroundColor ?? ([System.Console]::BackgroundColor))
+    }
+
+    Write-Host @Arguments
+
+    if ($NewLine) {
+        Write-Host ([char]0xA0)
+    }
+}
 
 # Check if we have admin rights
 $CurrentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-        
+
 if (!$CurrentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-     Write-Host -ForegroundColor Red "Admin privilege required to modify the registry as necessary"
-     exit 1
+    Write-Message -ForegroundColor Red "Admin privilege required to modify the registry as necessary."
+    exit 1
 }
 
 $ScrollingBehaviors = @("DEFAULT", "NATURAL")
 
 $SwitchValue = $args[0];
 
-if (($SwitchValue -eq "disable") -or ($SwitchValue -eq "reverse")) {
+if ($SwitchValue -eq "disable") {
     $TargetSettingValue = 0
-} else {
+}
+else {
     $TargetSettingValue = 1;
 }
 
-# $Mice = (Get-PnpDevice -Class Mouse).where{($_.Status -eq "OK") -and ($_.InstanceID -like "HID\VID*")}
-# The InstanceID of a bluetooth mouth starts with "HID\{_uuid_}" e.g.
-# HID\{00001812-0000-1000-8000-00805F9B34FB}_DEV_VID&021235_PID&AA22_REV&0001_231CC511CE68\9&2358A2F3&0&0000
-$Mice = (Get-PnpDevice -Class Mouse).where{($_.Status -eq "OK") -and (($_.InstanceID -like "HID\VID*") -or ($_.InstanceID -like "HID\*"))}
+$Mice = Find-Mouse
 
 if ($Mice.Count -eq 0) {
-    Write-Host -ForegroundColor Red "Could not find any USB Mouse. Exiting."
+    Write-Message -BackgroundColor Red -ForegroundColor White -Object "No mice found. Exiting."
     exit 1
 }
+
+Write-Message -ForegroundColor White -BackgroundColor DarkGreen -Object "$($Mice.Count) mouse device(s) found."
 
 $SettingUpdated = $false
 
@@ -73,29 +113,32 @@ foreach ($Mouse in $Mice) {
     $DeviceName = $Mouse.FriendlyName
     $DeviceInstanceId = $Mouse.InstanceID
 
-    Write-Host -ForegroundColor DarkMagenta "Found a mouse device: $DeviceName ($DeviceInstanceId)"
+    Write-Message -ForegroundColor DarkMagenta -Object "Device: $DeviceName ($DeviceInstanceId)"
 
-    $VerticalScrollingBehaviorUpdated = UpdateRegistryParameter -InstanceId $DeviceInstanceId -ParameterName FlipFlopWheel -TargetValue $TargetSettingValue
+    $VerticalScrollingBehaviorUpdated = Set-ScrollingBehavior -InstanceId $DeviceInstanceId -ParameterName FlipFlopWheel -TargetValue $TargetSettingValue
 
     if ($VerticalScrollingBehaviorUpdated) {
-        Write-Host -ForegroundColor Green "> Vertical scrolling behavior has been updated:" $ScrollingBehaviors[$TargetSettingValue]
-    } else {
-        Write-Host -ForegroundColor Green "> Keeping the current vertical scrolling behavior:" $ScrollingBehaviors[$TargetSettingValue]
+        Write-Message -ForegroundColor Green -Object "> Vertical scrolling behavior has been set to: $($ScrollingBehaviors[$TargetSettingValue])"
+    }
+    else {
+        Write-Message -ForegroundColor Green -Object "> Keeping the current vertical scrolling behavior: $($ScrollingBehaviors[$TargetSettingValue])"
     }
 
-    $HorizontalScrollingBehaviorUpdated = UpdateRegistryParameter -InstanceId $DeviceInstanceId -ParameterName FlipFlopHScroll -TargetValue $TargetSettingValue
+    $HorizontalScrollingBehaviorUpdated = Set-ScrollingBehavior -InstanceId $DeviceInstanceId -ParameterName FlipFlopHScroll -TargetValue $TargetSettingValue
 
     if ($HorizontalScrollingBehaviorUpdated) {
-        Write-Host -ForegroundColor Green "> Horizontal scrolling behavior has been updated to:" $ScrollingBehaviors[$TargetSettingValue]
-    } else {
-        Write-Host -ForegroundColor Green "> Keeping the current horizontal scrolling behavior:" $ScrollingBehaviors[$TargetSettingValue]
+        Write-Message -ForegroundColor Green -Object "> Horizontal scrolling behavior has been set to: $($ScrollingBehaviors[$TargetSettingValue])"
+    }
+    else {
+        Write-Message -ForegroundColor Green -Object "> Keeping the current horizontal scrolling behavior: $($ScrollingBehaviors[$TargetSettingValue])"
     }
 
     $SettingUpdated = $SettingUpdated -or $VerticalScrollingBehaviorUpdated -or $HorizontalScrollingBehaviorUpdated
 }
 
 if ($SettingUpdated) {
-    Write-Host -ForegroundColor Red "Done. You must reboot your computer for the changes to take effect."
-} else {
-    Write-Host -ForegroundColor Red "Done. No changes have been made."
+    Write-Message -ForegroundColor Red -BackgroundColor White -Object "Done. You must reboot your computer for the changes to take effect."
+}
+else {
+    Write-Message -ForegroundColor White -BackgroundColor DarkGray -Object "Done. No changes have been made."
 }
