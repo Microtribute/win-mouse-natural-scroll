@@ -73,22 +73,22 @@ foreach ($Mouse in $Mice) {
     $DeviceName = $Mouse.FriendlyName
     $DeviceInstanceId = $Mouse.InstanceID
 
-    Write-Host -ForegroundColor White -BackgroundColor DarkMagenta "Found a Mouse device $DeviceName ($DeviceInstanceId)"
+    Write-Host -ForegroundColor DarkMagenta "Found a mouse device: $DeviceName ($DeviceInstanceId)"
 
     $VerticalScrollingBehaviorUpdated = UpdateRegistryParameter -InstanceId $DeviceInstanceId -ParameterName FlipFlopWheel -TargetValue $TargetSettingValue
 
     if ($VerticalScrollingBehaviorUpdated) {
-        Write-Host -ForegroundColor Green "Vertical scrolling behavior has been set to " $ScrollingBehaviors[$TargetSettingValue]
+        Write-Host -ForegroundColor Green "> Vertical scrolling behavior has been updated:" $ScrollingBehaviors[$TargetSettingValue]
     } else {
-        Write-Host -ForegroundColor Green "Keeping the current vertical scrolling behavior: " $ScrollingBehaviors[$TargetSettingValue]
+        Write-Host -ForegroundColor Green "> Keeping the current vertical scrolling behavior:" $ScrollingBehaviors[$TargetSettingValue]
     }
 
     $HorizontalScrollingBehaviorUpdated = UpdateRegistryParameter -InstanceId $DeviceInstanceId -ParameterName FlipFlopHScroll -TargetValue $TargetSettingValue
 
     if ($HorizontalScrollingBehaviorUpdated) {
-        Write-Host -ForegroundColor Green "Horizontal scrolling behavior has been set to " $ScrollingBehaviors[$TargetSettingValue]
+        Write-Host -ForegroundColor Green "> Horizontal scrolling behavior has been updated to:" $ScrollingBehaviors[$TargetSettingValue]
     } else {
-        Write-Host -ForegroundColor Green "Keeping the current horizontal scrolling behavior: " $ScrollingBehaviors[$TargetSettingValue]
+        Write-Host -ForegroundColor Green "> Keeping the current horizontal scrolling behavior:" $ScrollingBehaviors[$TargetSettingValue]
     }
 
     $SettingUpdated = $SettingUpdated -or $VerticalScrollingBehaviorUpdated -or $HorizontalScrollingBehaviorUpdated
