@@ -39,7 +39,7 @@ function Set-ScrollingBehavior {
 }
 
 # Finds devices that are recognized as a mouse
-function Find-Mouse {    
+function Get-Mouse {    
     # $Mice = (Get-PnpDevice -Class Mouse).where{($_.Status -eq "OK") -and ($_.InstanceID -like "HID\VID*")}
     # The InstanceID of a bluetooth mouse starts with "HID\{_uuid_}" e.g.
     # HID\{00001812-0000-1000-8000-00805F9B34FB}_DEV_VID&021235_PID&AA22_REV&0001_231CC511CE68\9&2358A2F3&0&0000
@@ -98,7 +98,7 @@ else {
     $TargetSettingValue = 1;
 }
 
-$Mice = Find-Mouse
+$Mice = Get-Mouse
 
 if ($Mice.Count -eq 0) {
     Write-Message -BackgroundColor Red -ForegroundColor White -Object "No mice found. Exiting."
