@@ -83,7 +83,7 @@ function Write-Message {
 $CurrentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 
 if (!$CurrentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Message -ForegroundColor Red "Admin privilege required to modify the registry as necessary."
+    Write-Message -ForegroundColor Red -Object "Admin privilege required to modify the registry as necessary."
     exit 1
 }
 
