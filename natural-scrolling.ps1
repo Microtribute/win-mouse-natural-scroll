@@ -56,7 +56,6 @@ function Write-Message {
         [Parameter(Mandatory = $false)]
         [System.ConsoleColor]$ForegroundColor,
 
-
         [Parameter(Mandatory = $false)]
         [bool]$NewLine = $true,
 
